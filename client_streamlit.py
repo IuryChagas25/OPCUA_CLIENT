@@ -3,7 +3,7 @@ from opcua import Client
 import pandas as pd
 import time
 
-# Configuração da página
+# Configuração da página com loyout wide para melhor visualização
 st.set_page_config(
     page_title="Dashboard OPC UA",
     layout="wide"
@@ -22,7 +22,7 @@ if 'charts' not in st.session_state:
 
 # Sidebar: conexão
 st.sidebar.header("Conexão OPC UA")
-url = st.sidebar.text_input("URL do Servidor OPC UA", value="opc.tcp://192.168.1.5:53530")
+url = st.sidebar.text_input("URL do Servidor OPC UA", value="opc.tcp://192.168.1.5:5352") #valor definido como exemplo
 col1, col2 = st.sidebar.columns(2)
 with col1:
     if st.button("Conectar"):
@@ -31,7 +31,7 @@ with col1:
             client.connect()
             st.session_state.client = client
             st.session_state.connected = True
-            # Descobrir variáveis em 'simulation'
+            # Descobrir variáveis em 'simulation', onde estão os dados para esse exemplo
             root = client.get_objects_node()
             for child in root.get_children():
                 if child.get_browse_name().Name.lower() == "simulation":
@@ -41,6 +41,7 @@ with col1:
         except Exception as e:
             st.sidebar.error(f"Erro ao conectar: {e}")
 with col2:
+    #Caso o usuário queira desconectar
     if st.button("Desconectar"):
         if st.session_state.client:
             st.session_state.client.disconnect()
@@ -55,8 +56,9 @@ if st.session_state.connected and st.session_state.nodes and not st.session_stat
     st.markdown("---")
     st.header("📊 Variáveis em Tempo Real")
     names = [n.get_display_name().Text for n in st.session_state.nodes]
-    # Cria placeholders em grid 2 col
+    # Cria placeholders em grid 2 col com iteração sobre as variaveis
     for i, name in enumerate(names):
+        #caso seja par o gráfico será colocado na primeira coluna, caso seja ímpar na segunda
         if i % 2 == 0:
             cols = st.columns(2)
         placeholder = cols[i % 2].empty()
